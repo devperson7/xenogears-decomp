@@ -7,7 +7,6 @@ extern char D_80018CCC;
 void def_cbsync(void);
 void def_cbready(void);
 void def_cbread(void);
-void DeliverEvent(unsigned long, long);
 
 typedef void (*VoidCallback_t)(void);
 
@@ -52,6 +51,3 @@ void def_cbready(void) {
 void def_cbread() {
     DeliverEvent(0xF0000003, 0x40);
 }
-
-// FIXME: This is in a different TLU.
-INCLUDE_ASM("asm/slus_006.64/nonmatchings/psyq/libcd/event", DeliverEvent);
