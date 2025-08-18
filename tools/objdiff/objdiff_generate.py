@@ -69,6 +69,17 @@ def _determine_categories(path: Path, config) -> tuple[UnitMetadata, str]:
                 categories.append(category["id"])
     return (UnitMetadata(categories), str(modified_path))
 
+def _get_base_path_str(path: Path) -> str | None:
+    base = Path("build/src") /  path.with_suffix("").with_suffix("")
+    c_path = base.with_suffix(".c.o")
+    hasm_path = base.with_suffix(".hasm.s.o")
+
+    if c_path.exists():
+        return str(c_path)
+    if hasm_path.exists():
+        return str(hasm_path)
+    return None
+
 def main():
     logging.basicConfig(level = logging.INFO)
     config = _create_config()
@@ -78,13 +89,12 @@ def main():
     logging.info(f"Accounting for {len(expected_objects)} objects.")
     units = []
     for file in expected_objects:
-        processed_path = _determine_categories(file, config)
-        base_path = "build/src/" + processed_path[1].removesuffix(".s.o").removesuffix(".c.o") + ".c.o"
+        metadata, rel_path = _determine_categories(file, config)
         unit = Unit(
-            processed_path[1].removesuffix(".s.o").removesuffix(".c.o"),
-            base_path if Path(base_path).exists() else None,
+            rel_path.removesuffix(".s.o").removesuffix(".c.o"),
+            _get_base_path_str(Path(rel_path)),
             str(file),
-            processed_path[0])
+            metadata)
         units.append(unit)
     
     categories = []
